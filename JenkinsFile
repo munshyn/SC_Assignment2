@@ -4,19 +4,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'b5804654-7184-42e2-ae01-e5d29fcdbb92', url: 'https://github.com/munshyn/SC_Assignment2.git']])
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t opspanzu .'
+                bat 'docker build -t opspanzu .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                sh 'docker push husnymusharraf/opspanzu:latest'
+                script{
+                    withDockerRegistry(credentialsId: 'docker'){
+
+                    bat 'docker tag projectsc/opspanzu:latest'
+                    bat 'docker push husnymusharraf/opspanzu:latest'
+                    
+                    }
+                }
             }
         }
 
