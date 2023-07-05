@@ -8,12 +8,6 @@ pipeline {
             }
         }
 
-        stage('Collect Static Files') {
-            steps {
-                sh 'python manage.py collectstatic --no-input'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t opspanzu .'
@@ -26,11 +20,11 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
-            }
-        }
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         sh 'kubectl apply -f deployment.yaml'
+        //         sh 'kubectl apply -f service.yaml'
+        //     }
+        // }
     }
 }
