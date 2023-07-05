@@ -26,11 +26,11 @@ pipeline {
             }
         }
 
-        stage('Build and Deploy') {
-            steps {
-                // Additional steps for building and deploying your Django project
-                // For example, you might run commands to build Docker images or deploy to a server.
-            }
-        }
+        // stage('Build and Deploy') {
+        //     steps {
+        //         // Additional steps for building and deploying your Django project
+        //         // For example, you might run commands to build Docker images or deploy to a server.
+        //     }
+        // }
     }
 }
