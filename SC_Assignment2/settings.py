@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'SC_Assignment2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'scassignment2',
-        'HOST': '127.0.0.1',
-        'USER': 'root',
-        'PASSWORD': '',
+        'NAME': 'projectSC',
+        'HOST': 'database-laserlab.cqby2vhfd1ef.ap-southeast-1.rds.amazonaws.com',
+        'USER': 'laserlabadmin',
+        'PASSWORD': 'laserlab',
         'PORT': '3306',
     }
 }

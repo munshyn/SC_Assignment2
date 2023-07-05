@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opspanzu-SC
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opspanzu
+  template:
+    metadata:
+      labels:
+        app: opspanzu
+    spec:
+      containers:
+      - name: opspanzu
+        image: husnymusharraf/opspanzu:latest
+        ports:
+        - containerPort: 8000
