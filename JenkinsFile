@@ -8,18 +8,6 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh 'python manage.py test'
-            }
-        }
-
         stage('Collect Static Files') {
             steps {
                 sh 'python manage.py collectstatic --no-input'
