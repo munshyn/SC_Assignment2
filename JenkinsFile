@@ -6,14 +6,6 @@ pipeline {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'b5804654-7184-42e2-ae01-e5d29fcdbb92', url: 'https://github.com/munshyn/SC_Assignment2.git']])
             }
-            post {
-                always {
-                    jiraComment body: 'Checkout stage completed', issueKey: 'OPS-1'
-                }
-                failure {
-                    jiraComment body: 'Checkout stage failed', issueKey: 'OPS-1'
-                }
-            }
         }
 
         stage('Build Docker Image') {
@@ -22,17 +14,8 @@ pipeline {
                     try {
                         bat 'docker build -t opspanzu .'
                     } catch (Exception e) {
-                        jiraComment body: 'Build Docker Image stage failed', issueKey: 'OPS-1'
-                        throw e
+                        error("Build Docker Image stage failed: ${e.message}")
                     }
-                }
-            }
-            post {
-                always {
-                    jiraComment body: 'Build Docker Image stage completed', issueKey: 'OPS-1'
-                }
-                failure {
-                    jiraComment body: 'Build Docker Image stage failed', issueKey: 'OPS-1'
                 }
             }
         }
@@ -46,17 +29,8 @@ pipeline {
                             bat 'docker push husnymusharraf/opspanzu:latest'
                         }
                     } catch (Exception e) {
-                        jiraComment body: 'Push Docker Image stage failed', issueKey: 'OPS-1'
-                        throw e
+                        error("Push Docker Image stage failed: ${e.message}")
                     }
-                }
-            }
-            post {
-                always {
-                    jiraComment body: 'Push Docker Image stage completed', issueKey: 'OPS-1'
-                }
-                failure {
-                    jiraComment body: 'Push Docker Image stage failed', issueKey: 'OPS-1'
                 }
             }
         }
@@ -72,17 +46,21 @@ pipeline {
                             bat 'kubectl get services'
                         }
                     } catch (Exception e) {
-                        jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-1'
-                        throw e
+                        error("Deploy to Kubernetes stage failed: ${e.message}")
                     }
                 }
             }
-            post {
-                always {
-                    jiraComment body: 'Deploy to Kubernetes stage completed', issueKey: 'OPS-1'
-                }
-                failure {
-                    jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-1'
+        }
+    }
+
+    post {
+        always {
+            script {
+                def failedStage = currentBuild.result == 'FAILURE' ? currentBuild.currentStage.name : null
+                if (failedStage) {
+                    jiraComment body: "Pipeline run completed with a failure in the '${failedStage}' stage.", issueKey: 'OPS-1'
+                } else {
+                    jiraComment body: 'Pipeline run completed successfully.', issueKey: 'OPS-1'
                 }
             }
         }
