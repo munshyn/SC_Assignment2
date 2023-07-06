@@ -66,6 +66,6 @@ pipeline {
 }
 
 def createJiraIssue(summary, description) {
-    def curlCommand = "curl -D- -u husnymusharraf:polo123456 -X POST --data \"{\\\"fields\\\":{\\\"project\\\":{\\\"key\\\":\\\"OPS\\\"},\\\"summary\\\":\\\"${summary}\\\",\\\"description\\\":\\\"${description}\\\",\\\"issuetype\\\":{\\\"name\\\":\\\"Task\\\"}}}\" -H \"Content-Type: application/json\" https://localhost:8082/rest/api/2/issue/"
+    def curlCommand = "curl -D- -u husnymusharraf:polo123456 -X POST --insecure --data \"{\\\"fields\\\":{\\\"project\\\":{\\\"key\\\":\\\"OPS\\\"},\\\"summary\\\":\\\"${summary}\\\",\\\"description\\\":\\\"${description}\\\",\\\"issuetype\\\":{\\\"name\\\":\\\"Task\\\"}}}\" -H \"Content-Type: application/json\" https://localhost:8082/rest/api/2/issue/"
     bat(curlCommand)
 }
