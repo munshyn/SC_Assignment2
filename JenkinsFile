@@ -6,6 +6,14 @@ pipeline {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'b5804654-7184-42e2-ae01-e5d29fcdbb92', url: 'https://github.com/munshyn/SC_Assignment2.git']])
             }
+            post {
+                always {
+                    jiraComment body: 'Checkout stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Checkout stage failed', issueKey: 'OPS-1'
+                }
+            }
         }
 
         stage('Build Docker Image') {
@@ -14,9 +22,17 @@ pipeline {
                     try {
                         bat 'docker build -t opspanzu .'
                     } catch (Exception e) {
-                        createJiraIssue("Build Failure in Jenkins", "There was a failure in the Jenkins build for the project.")
+                        jiraComment body: 'Build Docker Image stage failed', issueKey: 'OPS-1'
                         throw e
                     }
+                }
+            }
+            post {
+                always {
+                    jiraComment body: 'Build Docker Image stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Build Docker Image stage failed', issueKey: 'OPS-1'
                 }
             }
         }
@@ -30,9 +46,17 @@ pipeline {
                             bat 'docker push husnymusharraf/opspanzu:latest'
                         }
                     } catch (Exception e) {
-                        createJiraIssue("Docker Image Push Failure in Jenkins", "There was a failure in pushing the Docker image.")
+                        jiraComment body: 'Push Docker Image stage failed', issueKey: 'OPS-1'
                         throw e
                     }
+                }
+            }
+            post {
+                always {
+                    jiraComment body: 'Push Docker Image stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Push Docker Image stage failed', issueKey: 'OPS-1'
                 }
             }
         }
@@ -48,24 +72,19 @@ pipeline {
                             bat 'kubectl get services'
                         }
                     } catch (Exception e) {
-                        createJiraIssue("Deployment Failure in Jenkins", "There was a failure in deploying to Kubernetes.")
+                        jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-1'
                         throw e
                     }
                 }
             }
-        }
-    }
-
-    post {
-        failure {
-            script {
-                createJiraIssue("Pipeline Failure in Jenkins", "There was a failure in the Jenkins pipeline.")
+            post {
+                always {
+                    jiraComment body: 'Deploy to Kubernetes stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-1'
+                }
             }
         }
     }
-}
-
-def createJiraIssue(summary, description) {
-    def curlCommand = "curl -D- -u husnymusharraf:polo123456 -X POST --insecure --data \"{\\\"fields\\\":{\\\"project\\\":{\\\"key\\\":\\\"OPS\\\"},\\\"summary\\\":\\\"${summary}\\\",\\\"description\\\":\\\"${description}\\\",\\\"issuetype\\\":{\\\"name\\\":\\\"Task\\\"}}}\" -H \"Content-Type: application/json\" https://localhost:8082/rest/api/2/issue/"
-    bat(curlCommand)
 }
