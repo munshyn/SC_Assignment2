@@ -6,62 +6,85 @@ pipeline {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'b5804654-7184-42e2-ae01-e5d29fcdbb92', url: 'https://github.com/munshyn/SC_Assignment2.git']])
             }
+            post {
+                always {
+                    jiraComment body: 'Checkout stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Checkout stage failed', issueKey: 'OPS-1'
+                }
+            }
         }
 
         stage('Build Docker Image') {
             steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    bat 'docker build -t opspanzu .'
+                script {
+                    try {
+                        bat 'docker build -t opspanzu .'
+                    } catch (Exception e) {
+                        jiraComment body: 'Build Docker Image stage failed', issueKey: 'OPS-1'
+                        throw e
+                    }
+                }
+            }
+            post {
+                always {
+                    jiraComment body: 'Build Docker Image stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Build Docker Image stage failed', issueKey: 'OPS-1'
                 }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    withDockerRegistry(credentialsId: 'docker') {
-                        bat 'docker tag opspanzu:latest husnymusharraf/opspanzu:latest'
-                        bat 'docker push husnymusharraf/opspanzu:latest'
+                script {
+                    try {
+                        withDockerRegistry(credentialsId: 'docker') {
+                            bat 'docker tag opspanzu:latest husnymusharraf/opspanzu:latest'
+                            bat 'docker push husnymusharraf/opspanzu:latest'
+                        }
+                    } catch (Exception e) {
+                        jiraComment body: 'Push Docker Image stage failed', issueKey: 'OPS-1'
+                        throw e
                     }
+                }
+            }
+            post {
+                always {
+                    jiraComment body: 'Push Docker Image stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Push Docker Image stage failed', issueKey: 'OPS-1'
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:60507/') {
-                        bat 'kubectl apply -f deployment.yaml'
-                        bat 'kubectl get deployment'
-                        bat 'kubectl apply -f service.yaml'
-                        bat 'kubectl get services'
+                script {
+                    try {
+                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:60507/') {
+                            bat 'kubectl apply -f deployment.yaml'
+                            bat 'kubectl get deployment'
+                            bat 'kubectl apply -f service.yaml'
+                            bat 'kubectl get services'
+                        }
+                    } catch (Exception e) {
+                        jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-1'
+                        throw e
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            script {
-                def failedStage = currentBuild.result == 'FAILURE' ? findFailedStage() : null
-                if (failedStage) {
-                    jiraComment body: "Pipeline run completed with a failure in the '${failedStage}' stage.", issueKey: 'OPS-1'
-                } else {
-                    jiraComment body: 'Pipeline run completed successfully.', issueKey: 'OPS-1'
+            post {
+                always {
+                    jiraComment body: 'Deploy to Kubernetes stage completed', issueKey: 'OPS-1'
+                }
+                failure {
+                    jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-1'
                 }
             }
         }
     }
-}
-
-def findFailedStage() {
-    def failedStage = null
-    for (stage in currentBuild.rawBuild.getAction(org.jenkinsci.plugins.workflow.actions.StageAction).getStages()) {
-        if (stage.getHasFailure()) {
-            failedStage = stage.getName()
-            break
-        }
-    }
-    return failedStage
 }
