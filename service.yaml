@@ -4,9 +4,9 @@ metadata:
   name: opspanzu-service
 spec:
   selector:
-    app: opspanzu
+    app: opspanzu-webcontent-complete
   ports:
-    - protocol: TCP
+    - protocol: "TCP"
       port: 8000
       targetPort: 8000
   type: LoadBalancer
