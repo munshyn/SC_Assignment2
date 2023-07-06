@@ -10,16 +10,28 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t opspanzu .'
+                script {
+                    try {
+                        bat 'docker build -t opspanzu .'
+                    } catch (Exception e) {
+                        createJiraIssue("Build Failure in Jenkins", "There was a failure in the Jenkins build for the project.")
+                        throw e
+                    }
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker') {
-                        bat 'docker tag opspanzu:latest husnymusharraf/opspanzu:latest'
-                        bat 'docker push husnymusharraf/opspanzu:latest'
+                    try {
+                        withDockerRegistry(credentialsId: 'docker') {
+                            bat 'docker tag opspanzu:latest husnymusharraf/opspanzu:latest'
+                            bat 'docker push husnymusharraf/opspanzu:latest'
+                        }
+                    } catch (Exception e) {
+                        createJiraIssue("Docker Image Push Failure in Jenkins", "There was a failure in pushing the Docker image.")
+                        throw e
                     }
                 }
             }
@@ -27,11 +39,18 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:60507/') {
-                    bat 'kubectl apply -f deployment.yaml'
-                    bat 'kubectl get deployment'
-                    bat 'kubectl apply -f serve.yaml'
-                    bat 'kubectl get services'
+                script {
+                    try {
+                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:60507/') {
+                            bat 'kubectl apply -f deployment.yaml'
+                            bat 'kubectl get deployment'
+                            bat 'kubectl apply -f service.yaml'
+                            bat 'kubectl get services'
+                        }
+                    } catch (Exception e) {
+                        createJiraIssue("Deployment Failure in Jenkins", "There was a failure in deploying to Kubernetes.")
+                        throw e
+                    }
                 }
             }
         }
@@ -40,37 +59,13 @@ pipeline {
     post {
         failure {
             script {
-                def issueData = [
-                    "fields": [
-                        "project": [
-                            "key": "OPSPANZU"
-                        ],
-                        "summary": "Build Failure in Jenkins",
-                        "description": "There was a failure in the Jenkins build for the project.",
-                        "issuetype": [
-                            "name": "Bug"
-                        ]
-                    ]
-                ]
-
-                def apiUrl = "https://opspanzu.atlassian.net/rest/api/latest/issue/"
-                def auth = "husnymusharraf:ATATT3xFfGF05D-LYY1oeuFwG1KfkgnWxEWu4alvuCCj0zrDVmwKXIytkLSfmq8A4e3iUDFOcPvSABE6c0YnapnKJEMG5PM_P-W12-BVyjjDNt_hGwXA5g-HT5kLfQD0V1BXZ2aYXmlKYISWpHi-fuWQ8noluIHRzVgFeDsWxtQvjrYJ3QPIX3g=8C58132C"
-                def credentials = auth.bytes.encodeBase64().toString()
-
-                def response = httpRequest httpMode: 'POST',
-                                          url: apiUrl,
-                                          contentType: 'application/json',
-                                          authentication: credentials,
-                                          requestBody: groovy.json.JsonOutput.toJson(issueData)
-
-                if (response.status == 201) {
-                    println "Jira issue created successfully"
-                    println "Issue Key: " + response.data.key
-                } else {
-                    println "Failed to create Jira issue"
-                    println "Response: " + response.content
-                }
+                createJiraIssue("Pipeline Failure in Jenkins", "There was a failure in the Jenkins pipeline.")
             }
         }
     }
+}
+
+def createJiraIssue(summary, description) {
+    def curlCommand = "curl -D- -u husnymusharraf:ATATT3xFfGF05D-LYY1oeuFwG1KfkgnWxEWu4alvuCCj0zrDVmwKXIytkLSfmq8A4e3iUDFOcPvSABE6c0YnapnKJEMG5PM_P-W12-BVyjjDNt_hGwXA5g-HT5kLfQD0V1BXZ2aYXmlKYISWpHi-fuWQ8noluIHRzVgFeDsWxtQvjrYJ3QPIX3g=8C58132C -X POST --data \"{\\\"fields\\\":{\\\"project\\\":{\\\"key\\\":\\\"OPSPANZU\\\"},\\\"summary\\\":\\\"${summary}\\\",\\\"description\\\":\\\"${description}\\\",\\\"issuetype\\\":{\\\"name\\\":\\\"Task\\\"}}}\" -H \"Content-Type: application/json\" https://opspanzu.atlassian.net/rest/api/2/issue/"
+    bat(curlCommand)
 }
