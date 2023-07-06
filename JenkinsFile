@@ -66,6 +66,6 @@ pipeline {
 }
 
 def createJiraIssue(summary, description) {
-    def curlCommand = "curl -D- -u husnymusharraf:ATATT3xFfGF0AaEkqMD8g8aYhM-lKlyItP8teXxEhMaCjjCm-BzcrxhbWVXUL1HxRdNKRlrHcPplvl1Nhh7uN9j2iBe7hFiFP8-N87QLvYYMNQYEtDuAK1cKEsIINie9UV95B2D_7IyozFdM26r8bRmqfVwIvkw1hbYEb8a2WKHMhS6Edwlw7f0=748DB957 -X POST --insecure --data \"{\\\"fields\\\":{\\\"project\\\":{\\\"key\\\":\\\"OPSPANZU\\\"},\\\"summary\\\":\\\"${summary}\\\",\\\"description\\\":\\\"${description}\\\",\\\"issuetype\\\":{\\\"name\\\":\\\"Task\\\"}}}\" -H \"Content-Type: application/json\" https://opspanzu.atlassian.net/rest/api/2/issue/"
+    def curlCommand = "curl -D- -u husnymusharraf:polo123456 -X POST --data \"{\\\"fields\\\":{\\\"project\\\":{\\\"key\\\":\\\"OPS\\\"},\\\"summary\\\":\\\"${summary}\\\",\\\"description\\\":\\\"${description}\\\",\\\"issuetype\\\":{\\\"name\\\":\\\"Task\\\"}}}\" -H \"Content-Type: application/json\" "
     bat(curlCommand)
 }
