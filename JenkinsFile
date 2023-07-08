@@ -70,6 +70,7 @@ pipeline {
                             bat 'kubectl get deployment'
                             bat 'kubectl apply -f service.yaml'
                             bat 'kubectl get services'
+                            
                         }
                     } catch (Exception e) {
                         jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-2'
