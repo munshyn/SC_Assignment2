@@ -65,12 +65,12 @@ pipeline {
             steps {
                 script {
                     try {
-                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:57783/') {
+                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:57723/') {
                             bat 'kubectl apply -f deployment.yaml'
                             bat 'kubectl get deployment'
                             bat 'kubectl apply -f service.yaml'
                             bat 'kubectl get services'
-                            
+
                         }
                     } catch (Exception e) {
                         jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-2'
