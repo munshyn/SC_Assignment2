@@ -65,7 +65,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:53413/') {
+                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:57783/') {
                             bat 'kubectl apply -f deployment.yaml'
                             bat 'kubectl get deployment'
                             bat 'kubectl apply -f service.yaml'
