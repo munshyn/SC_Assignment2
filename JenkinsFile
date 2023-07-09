@@ -16,7 +16,14 @@ pipeline {
             }
         }
 
-
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQubeServerName') {
+                    sh 'sonar-scanner'
+                }
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 script {
