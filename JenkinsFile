@@ -62,27 +62,27 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-        steps {
-            script {
-                try {
-                    withSonarQubeEnv() {
-                        bat "SonarQube Server/bin/sonar-scanner"
-                    }
-                } catch (Exception e) {
-                    jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
-                    throw e
+    steps {
+        script {
+            try {
+                withSonarQubeEnv('SonarQube Server') {
+                    bat 'sonar-scanner -Dsonar.projectKey=OPS'
                 }
-            }
-        }
-        post {
-            always {
-                jiraComment body: 'SonarQube Analysis stage completed', issueKey: 'OPS-2'
-            }
-            failure {
+            } catch (Exception e) {
                 jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
+                throw e
             }
         }
     }
+    post {
+        always {
+            jiraComment body: 'SonarQube Analysis stage completed', issueKey: 'OPS-2'
+        }
+        failure {
+            jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
+        }
+    }
+}
 
 
         stage('Deploy to Kubernetes') {
