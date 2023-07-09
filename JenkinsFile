@@ -16,6 +16,29 @@ pipeline {
             }
         }
 
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 withSonarQubeEnv('SonarQube Server') {
+        //                     bat 'sonar-scanner'
+        //                 }
+        //             } catch (Exception e) {
+        //                 jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             jiraComment body: 'SonarQube Analysis stage completed', issueKey: 'OPS-2'
+        //         }
+        //         failure {
+        //             jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
+        //         }
+        //     }
+        // }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -88,7 +111,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:57783/') {
+                        withKubeConfig(caCertificate: 'C:\\Users\\Lenovo\\.minikube\\ca.crt', clusterName: 'kubernetes-dashboard', contextName: '', credentialsId: 'kubernetes', namespace: 'kubernetes-dashboard', restrictKubeConfigAccess: false, serverUrl: 'http://127.0.0.1:57723/') {
                             bat 'kubectl apply -f deployment.yaml'
                             bat 'kubectl get deployment'
                             bat 'kubectl apply -f service.yaml'
@@ -99,7 +122,7 @@ pipeline {
                         jiraComment body: 'Deploy to Kubernetes stage failed', issueKey: 'OPS-2'
                         throw e
                     }
-                    
+
                 }
             }
             post {
