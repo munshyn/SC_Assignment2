@@ -63,15 +63,8 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    try {
-                        withSonarQubeEnv('SonarQube Server') {
-                            bat 'sonar-scanner'
-                        }
-                    } catch (Exception e) {
-                        jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
-                        throw e
-                    }
+                withSonarQubeEnv('SonarQube Server') {
+                    sh 'sonar-scanner -Dsonar.projectKey=OPS' // Execute SonarQube scanner with project key
                 }
             }
             post {
