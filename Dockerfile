@@ -1,5 +1,6 @@
 # Use a base image with Python pre-installed
 FROM python:3.11
+FROM node:19.5.0-alpine
 
 # Set the working directory in the container
 WORKDIR /app
