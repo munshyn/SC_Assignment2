@@ -18,12 +18,27 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQubeServerName') {
-                    sh 'sonar-scanner'
+                script {
+                    try {
+                        withSonarQubeEnv('SonarQube Server') {
+                            bat 'sonar-scanner'
+                        }
+                    } catch (Exception e) {
+                        jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
+                        throw e
+                    }
+                }
+            }
+            post {
+                always {
+                    jiraComment body: 'SonarQube Analysis stage completed', issueKey: 'OPS-2'
+                }
+                failure {
+                    jiraComment body: 'SonarQube Analysis stage failed', issueKey: 'OPS-2'
                 }
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
                 script {
