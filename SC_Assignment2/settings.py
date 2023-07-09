@@ -165,6 +165,8 @@ SIMPLE_JWT = {
     ),
 }
 
+USER_SERIALIZER='accounts.serializers.UserCreateSerializer'
+
 DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
@@ -173,9 +175,9 @@ DJOSER = {
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'SERIALIZERS': {
-        'user_create': 'accounts.serializers.UserCreateSerializer',
-        'user': 'accounts.serializers.UserCreateSerializer',
-        'current_user': 'accounts.serializers.UserCreateSerializer',
+        'user_create': USER_SERIALIZER,
+        'user': USER_SERIALIZER,
+        'current_user': USER_SERIALIZER,
         'user_delete': 'djoser.serializers.UserDeleteSerializer',
     }
 }

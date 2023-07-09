@@ -9,7 +9,7 @@ import {
 
 const initialState = [];
 
-export default function (equipments = initialState, action) {
+export default function (action,equipments = initialState) {
   const { type, payload } = action;
 
   switch (type) {
